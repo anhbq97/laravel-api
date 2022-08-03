@@ -13,6 +13,11 @@ class AuthController extends Controller
 {
     public function register(Request $request)
     {
+        $response = [
+            'data' => [],
+            'messasge' => 'Tạo tài khoản thất bại.'
+        ];
+
         $validator = Validator::make($request->all(),[
             'name' => 'required|string',
             'email' => 'required|string|email|unique:users,email',
@@ -23,7 +28,7 @@ class AuthController extends Controller
             ]
         ]);
 
-        if($validator->fails()){
+        if ($validator->fails()) {
             return response()->json($validator->errors());       
         }
 
@@ -32,11 +37,21 @@ class AuthController extends Controller
             'email' => $request->email,
             'password' => bcrypt($request->password)
         ]);
-        
-        $token = $user->createToken('auth_token')->plainTextToken;
 
+        if ($user) {
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            $response['data'] = [
+                'user' => $user,
+                'access_token' => $token, 
+                'token_type' => 'Bearer'
+            ];
+
+            $response['message'] = 'Tạo tài khoản thất bại. Cần đợi admin Kích hoạt!';
+        }
+        
         return response()
-            ->json(['data' => $user,'access_token' => $token, 'token_type' => 'Bearer', 'message' => 'Tạo tài khoản thành công. Cần đợi admin Kích hoạt!']);
+            ->json($response);
     }
 
     public function login(Request $request)

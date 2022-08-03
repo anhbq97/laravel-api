@@ -4,29 +4,23 @@ namespace App\Http\Controllers\API;
 
 use App\Constants;
 use App\Http\Controllers\Controller;
-use App\Models\Product;
+use App\Models\ProductCategory;
 use Illuminate\Http\Request;
 
-class ProductController extends Controller
+class ProductCategoryController extends Controller
 {
-
-    public function __construct()
-    {
-        $this->middleware('permission:destroy')->only('destroy');
-    }
-
     public function index()
     {
         $response = [
             'data' => [],
-            'message' => 'Get List Product false'
+            'message' => 'Get List Product Category false'
         ];
 
-        $product = Product::where('status', Constants::PRODUCT_STATUS_ACTIVE)->orderBy('product.created_at', 'desc')->paginate(3);
+        $product = ProductCategory::orderBy('product_category.created_at', 'desc')->paginate(3);
         
         if ($product) {
             $response['data'] = $product;
-            $response['message'] = 'Get List Product success';
+            $response['message'] = 'Get List Product Category success';
         }
 
         return response()->json($response);
@@ -41,31 +35,24 @@ class ProductController extends Controller
     {
         $response = [
             'data' => [],
-            'message' => 'New Product Created fail'
+            'message' => 'New Product category Created fail'
         ];
 
-        $validator = Validator($request->only('name', 'price', 'brand_id', 'product_category_id'), [
+        $validator = Validator($request->only('name'), [
             'name' => 'max:255|string',
-            'price' => 'numeric',
-            'brand_id' => 'integer',
-            'product_category_id' => 'integer'
         ]);
 
         if ($validator->fails()) {
             return response()->json([$validator->errors(), $response['message'], ]);
         }
 
-        $product = Product::create([
+        $product_category = ProductCategory::create([
             'name' => $request->name,
-            'price' => $request->price,
-            'brand_id' => $request->brand_id,
-            'product_category_id' => $request->product_category_id,
-            'status' => Constants::PRODUCT_STATUS_ACTIVE
         ]);
 
-        if ($product) {
-            $response['data'] = $product;
-            $response['message'] = 'New Product created success';
+        if ($product_category) {
+            $response['data'] = $product_category;
+            $response['message'] = 'New Product category created success';
         }
 
         return response()->json($response);
@@ -86,7 +73,7 @@ class ProductController extends Controller
             return response()->json([$validator->errors(), 'Request need contain only id']);
         }
 
-        $brand = Product::where('id', $id)->first();
+        $brand = ProductCategory::where('id', $id)->first();
 
         if ($brand) {
             $response['data'] = $brand;
@@ -108,24 +95,17 @@ class ProductController extends Controller
             'message' => 'Update fails'
         ];
 
-        $validator = Validator($request->only('name', 'price', 'brand_id', 'product_category_id'), [
+        $validator = Validator($request->only('name'), [
             'name' => 'max:255|string',
-            'price' => 'numeric',
-            'brand_id' => 'integer',
-            'product_category_id' => 'integer'
         ]);
 
         if ($validator->fails()) {
             return response()->json([$validator->errors()]);
         }
 
-        $brand = Product::where('id', $id)
-        ->where('status', Constants::PRODUCT_STATUS_ACTIVE)
+        $brand = ProductCategory::where('id', $id)
         ->update([
             'name' => $request->name,
-            'price' => $request->price,
-            'brand_id' => $request->brand_id,
-            'product_category_id' => $request->product_category_id,
         ]);
 
         if ($brand) {
@@ -142,10 +122,10 @@ class ProductController extends Controller
             'message' => 'Delete false',
         ];
 
-        $brand = Product::where('id', $id)
-        ->where('status', Constants::PRODUCT_STATUS_ACTIVE)
+        $brand = ProductCategory::where('id', $id)
+        ->where('status', Constants::PRODUCT_CATEGORY_STATUS_ACTIVE)
         ->update([
-            'status' => Constants::PRODUCT_STATUS_DEACTIVE
+            'status' => Constants::PRODUCT_CATEGORY_STATUS_DEACTIVE
         ]);
 
         if ($brand) {
