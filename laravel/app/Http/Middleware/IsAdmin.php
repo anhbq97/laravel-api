@@ -16,7 +16,7 @@ class IsAdmin
      */
     public function handle(Request $request, Closure $next)
     {
-        if (!auth()->user()->role) {
+        if (!auth()->user()->role_id) {
             abort(403);
         }
 
