@@ -66,11 +66,6 @@ class AuthController extends Controller
             return redirect()->route('login')->with('error', 'Tài khoản chưa được kích hoạt.');
         }
 
-//        $token = $user->createToken('main')->plainTextToken; vuejs
-        //        return response([
-//            'user' => $user,
-//            'token' => $token
-//        ]);
         $view = 'user.index';
 
         if (self::isAdmin($user['role'])) {
@@ -84,14 +79,8 @@ class AuthController extends Controller
     {
         $user = Auth::user();
 
-//        $user->currentAccessToken()->delete();
-
-//        Session::flush();
         Auth::logout();
         return redirect('login');
-//        return response([ vuejs
-//            'success' => true
-//        ]);
     }
 
     private static function isAdmin($user)

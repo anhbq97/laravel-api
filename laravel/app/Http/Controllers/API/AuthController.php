@@ -47,17 +47,20 @@ class AuthController extends Controller
                 'token_type' => 'Bearer'
             ];
 
-            $response['message'] = 'Tạo tài khoản thất bại. Cần đợi admin Kích hoạt!';
+            $response['message'] = 'Tạo tài khoản thanh cong. Cần đợi admin Kích hoạt!';
         }
         
-        return response()
-            ->json($response);
+        return response()->json($response);
     }
 
     public function login(Request $request)
     {
-        if (!Auth::attempt($request->only('email', 'password')))
-        {
+        $response = [
+            'data' => [],
+            'message' => 'Login fail'
+        ];
+
+        if (!Auth::attempt($request->only('email', 'password'))) {
             return response()
                 ->json(['message' => 'Unauthorized'], 401);
         }
@@ -66,16 +69,35 @@ class AuthController extends Controller
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        return response()
-            ->json(['message' => 'Hi '.$user->name.', welcome to home','access_token' => $token, 'token_type' => 'Bearer', ]);
+        if ($token) {
+            $response['data']['access_token'] = $token;
+            $response['data']['token_type'] = 'Bearer';
+            $response['message'] = 'Hi ' . $user->name;
+        }
+
+        return response()->json($response);
     }
 
-    public function logout(User $user)
+    public function logout(Request $request)
     {
-        $user->tokens()->delete();
-
-        return [
-            'message' => 'You have successfully logged out and the token was successfully deleted'
+        $response = [
+            'data' => [],
+            'message' => 'Logout fails'
         ];
+
+        $request->user()->currentAccessToken()->delete();
+
+        $response['message'] = 'Logout success. Bye ' . $request->user()->name;
+
+        return response()->json($response);
+    }
+
+    public function getTokens()
+    {
+        // Auth::user()->tokens->each(function($token, $key) {
+        //     $token->delete();
+        // });
+
+        return response()->json(Auth::user()->tokens);
     }
 }

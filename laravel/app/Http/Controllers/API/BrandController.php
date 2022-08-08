@@ -12,6 +12,11 @@ use Illuminate\Support\Facades\Validator;
 
 class BrandController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:destroy')->only('destroy');
+    }
+    
     public function index()
     {
         $response = [

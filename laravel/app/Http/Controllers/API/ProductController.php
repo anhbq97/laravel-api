@@ -22,7 +22,7 @@ class ProductController extends Controller
             'message' => 'Get List Product false'
         ];
 
-        $product = Product::where('status', Constants::PRODUCT_STATUS_ACTIVE)->orderBy('product.created_at', 'desc')->paginate(3);
+        $product = Product::products();
         
         if ($product) {
             $response['data'] = $product;
