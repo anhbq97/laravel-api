@@ -4,6 +4,8 @@ namespace App;
 class Constants {
     const ROLE_ADMIN = 1;
     const ROLE_USER = 2;
+    const ROLE_EDITOR = 3;
+    const ROLE_MANAGER_SYSTEM = 4;
 
     const USER_IS_ACTIVE = 1;
     const USER_IS_DEACTIVE = 0;

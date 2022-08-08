@@ -4,14 +4,19 @@ namespace App\Http\Controllers\API;
 
 use App\Constants;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\PermissionController;
 use App\Models\Brand;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class BrandController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('permission:destroy')->only('destroy');
+        $this->middleware('permission:read')->only('index', 'show');
+        $this->middleware('permission:create')->only('create', 'store');
+        $this->middleware('permission:update')->only('edit', 'update');
+        $this->middleware('permission:delete')->only('destroy');
     }
     
     public function index()
@@ -120,7 +125,9 @@ class BrandController extends Controller
             ]);
     
             if ($brand) {
+                $response['data'] = $brand;
                 $response['message'] = 'Update success';
+                $response['code'] = 200;
             }
         } catch (\Exception $e) {
             echo 'Something Error in' . $e->getMessage() . "\n";

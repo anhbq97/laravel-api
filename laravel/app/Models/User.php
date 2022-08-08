@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\HasRoles;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -21,6 +22,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'is_active',
+        'role_id'
     ];
 
     /**
@@ -31,6 +34,8 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'is_active',
+        'role_id'
     ];
 
     /**
@@ -41,4 +46,29 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    // protected $hasRole;
+
+    // public function getHasRoleAttribute($permission)
+    // {
+    //     return 'a';
+    // }
+
+    public function hasRole($permission)
+    {
+        try {
+            $permission = RolePermission::leftJoin('users_permission', 'users_permission.id', '=', 'role_permission.permission_id')
+            ->where('role_permission.role_id', $this->role_id)
+            ->where('users_permission.name', $permission)->first();
+    
+            if (!$permission) {
+                return false;
+            }
+    
+            return true;
+        } catch (\Exception $e) {
+            echo 'Something Error in' . $e->getMessage() . "\n";
+            return false;
+        }
+    }
 }

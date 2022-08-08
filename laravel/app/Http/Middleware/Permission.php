@@ -2,9 +2,9 @@
 
 namespace App\Http\Middleware;
 
-use App\Constants;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class Permission
 {
@@ -14,10 +14,11 @@ class Permission
      * @param  \Illuminate\Http\Request  $request
      * @param  \Closure(\Illuminate\Http\Request): (\Illuminate\Http\Response|\Illuminate\Http\RedirectResponse)  $next
      * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
+     * @var hasRole() *
      */
-    public function handle(Request $request, Closure $next, $action)
+    public function handle(Request $request, Closure $next, $permission)
     {
-        if ($action == 'destroy' && auth()->user()->role !== Constants::ROLE_ADMIN) {
+        if (!Auth::user()->hasRole($permission)) {
             abort(403, 'Permission denied');
         }
         
