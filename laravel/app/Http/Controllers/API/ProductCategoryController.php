@@ -11,16 +11,17 @@ class ProductCategoryController extends Controller
 {
     public function index()
     {
-        $response = [
-            'data' => [],
-            'message' => 'Get List Product Category false'
-        ];
+        $response = $this->response();
 
-        $product = ProductCategory::orderBy('product_category.created_at', 'desc')->paginate(3);
+        try {
+            $product = ProductCategory::orderBy('product_category.created_at', 'desc')->paginate(3);
         
-        if ($product) {
-            $response['data'] = $product;
-            $response['message'] = 'Get List Product Category success';
+            if ($product) {
+                $response['data'] = $product;
+                $response['message'] = 'Get List Product Category success';
+            }
+        } catch (\Exception $e) {
+            echo 'Something Error in' . $e->getMessage() . "\n";
         }
 
         return response()->json($response);
@@ -33,26 +34,30 @@ class ProductCategoryController extends Controller
 
     public function store(Request $request)
     {
-        $response = [
-            'data' => [],
-            'message' => 'New Product category Created fail'
-        ];
+        $response = $this->response();
 
-        $validator = Validator($request->only('name'), [
-            'name' => 'max:255|string',
-        ]);
+        try {
+            $validator = Validator($request->only('name'), [
+                'name' => 'max:255|string',
+            ]);
+    
+            if ($validator->fails()) {
+                $response['data'] = $validator->errors();
+                $response['message'] = 'Validator fails';
 
-        if ($validator->fails()) {
-            return response()->json([$validator->errors(), $response['message'], ]);
-        }
-
-        $product_category = ProductCategory::create([
-            'name' => $request->name,
-        ]);
-
-        if ($product_category) {
-            $response['data'] = $product_category;
-            $response['message'] = 'New Product category created success';
+                return response()->json($response);
+            }
+    
+            $product_category = ProductCategory::create([
+                'name' => $request->name,
+            ]);
+    
+            if ($product_category) {
+                $response['data'] = $product_category;
+                $response['message'] = 'New Product category created success';
+            }
+        } catch (\Exception $e) {
+            echo 'Something Error in' . $e->getMessage() . "\n";
         }
 
         return response()->json($response);
@@ -60,24 +65,17 @@ class ProductCategoryController extends Controller
 
     public function show($id)
     {
-        $response = [
-            'data' => [],
-            'message' => 'Get single product false'
-        ];
+        $response = $this->response();
 
-        $validator = Validator(['id'], [
-            'id' => 'integer'
-        ]);
-        
-        if ($validator->fails()) {
-            return response()->json([$validator->errors(), 'Request need contain only id']);
-        }
+        try {
+            $brand = ProductCategory::where('id', $id)->first();
 
-        $brand = ProductCategory::where('id', $id)->first();
-
-        if ($brand) {
-            $response['data'] = $brand;
-            $response['message'] = 'Get single product success';
+            if ($brand) {
+                $response['data'] = $brand;
+                $response['message'] = 'Get single product success';
+            }
+        } catch (\Exception $e) {
+            echo 'Something Error in' . $e->getMessage() . "\n";
         }
 
         return response()->json($response);
@@ -90,26 +88,29 @@ class ProductCategoryController extends Controller
 
     public function update(Request $request, $id)
     {
-        $response = [
-            'data' => [],
-            'message' => 'Update fails'
-        ];
+        $response = $this->response();
 
-        $validator = Validator($request->only('name'), [
-            'name' => 'max:255|string',
-        ]);
+        try {
+            $validator = Validator($request->only('name'), [
+                'name' => 'max:255|string',
+            ]);
+    
+            if ($validator->fails()) {
+                $response['data'] = $validator->errors();
 
-        if ($validator->fails()) {
-            return response()->json([$validator->errors()]);
-        }
-
-        $brand = ProductCategory::where('id', $id)
-        ->update([
-            'name' => $request->name,
-        ]);
-
-        if ($brand) {
-            $response['message'] = 'Update success';
+                return response()->json($response);
+            }
+    
+            $brand = ProductCategory::where('id', $id)
+            ->update([
+                'name' => $request->name,
+            ]);
+    
+            if ($brand) {
+                $response['message'] = 'Update success';
+            }
+        } catch (\Exception $e) {
+            echo 'Something Error in' . $e->getMessage() . "\n";
         }
 
         return response()->json($response);
@@ -117,19 +118,20 @@ class ProductCategoryController extends Controller
 
     public function destroy($id)
     {
-        $response = [
-            'data' => [],
-            'message' => 'Delete false',
-        ];
+        $response = $this->response();
 
-        $brand = ProductCategory::where('id', $id)
-        ->where('status', Constants::PRODUCT_CATEGORY_STATUS_ACTIVE)
-        ->update([
-            'status' => Constants::PRODUCT_CATEGORY_STATUS_DEACTIVE
-        ]);
-
-        if ($brand) {
-            $response['message'] = 'Delete success!';
+        try {
+            $brand = ProductCategory::where('id', $id)
+            ->where('status', Constants::PRODUCT_CATEGORY_STATUS_ACTIVE)
+            ->update([
+                'status' => Constants::PRODUCT_CATEGORY_STATUS_DEACTIVE
+            ]);
+    
+            if ($brand) {
+                $response['message'] = 'Delete success!';
+            }
+        } catch (\Exception $e) {
+            echo 'Something Error in' . $e->getMessage() . "\n";
         }
 
         return response()->json($response);

@@ -4,11 +4,8 @@ namespace App\Http\Controllers\API;
 
 use App\Constants;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\BrandResource;
 use App\Models\Brand;
-use Illuminate\Auth\Events\Validated;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 
 class BrandController extends Controller
 {
@@ -19,16 +16,18 @@ class BrandController extends Controller
     
     public function index()
     {
-        $response = [
-            'data' => [],
-            'message' => 'Get List Brand false'
-        ];
+        $response = $this->response();
 
-        $brands = Brand::where('status', Constants::BRAND_STATUS_ACTIVE)->orderBy('brand.created_at', 'desc')->paginate(3);
+        try {
+            $brands = Brand::where('status', Constants::BRAND_STATUS_ACTIVE)->orderBy('brand.created_at', 'desc')->paginate(3);
         
-        if ($brands) {
-            $response['data'] = $brands;
-            $response['message'] = 'Get List Brand success';
+            if ($brands) {
+                $response['data'] = $brands;
+                $response['message'] = 'Get List Brand success';
+                $response['code'] = 200;
+            }
+        } catch (\Exception $e) {
+            echo 'Something Error in' . $e->getMessage() . "\n";
         }
 
         return response()->json($response);
@@ -41,29 +40,34 @@ class BrandController extends Controller
 
     public function store(Request $request)
     {
-        $response = [
-            'data' => [],
-            'message' => 'New Brand Created fail'
-        ];
+        $response = $this->response();
 
-        $validator = Validator($request->only('name', 'logo'), [
-            'name' => 'max:255|string',
-            'logo' => 'string'
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([$validator->errors(), $response['message'], ]);
-        }
-
-        $brand = Brand::create([
-            'name' => $request->name,
-            'logo' => $request->logo,
-            'status' => Constants::BRAND_STATUS_ACTIVE
-        ]);
-
-        if ($brand) {
-            $response['data'] = $brand;
-            $response['message'] = 'New Brand created success';
+        try {
+            $validator = Validator($request->only('name', 'logo'), [
+                'name' => 'max:255|string',
+                'logo' => 'string'
+            ]);
+    
+            if ($validator->fails()) {
+                $response['data'] = $validator->errors();
+                $response['message'] = 'Validator fails';
+    
+                return response()->json($response);
+            }
+    
+            $brand = Brand::create([
+                'name' => $request->name,
+                'logo' => $request->logo,
+                'status' => Constants::BRAND_STATUS_ACTIVE
+            ]);
+    
+            if ($brand) {
+                $response['data'] = $brand;
+                $response['message'] = 'New Brand created success';
+                $response['code'] = 200;
+            }
+        } catch (\Exception $e) {
+            echo 'Something Error in' . $e->getMessage() . "\n";
         }
 
         return response()->json($response);
@@ -71,24 +75,17 @@ class BrandController extends Controller
 
     public function show($id)
     {
-        $response = [
-            'data' => [],
-            'message' => 'Get data false'
-        ];
+        $response = $this->response();
 
-        $validator = Validator(['id'], [
-            'id' => 'integer'
-        ]);
-        
-        if ($validator->fails()) {
-            return response()->json([$validator->errors(), 'Request need contain only id']);
-        }
+        try {
+            $brand = Brand::where('id', $id)->first();
 
-        $brand = Brand::where('id', $id)->first();
-
-        if ($brand) {
-            $response['data'] = $brand;
-            $response['message'] = 'Get data success';
+            if ($brand) {
+                $response['data'] = $brand;
+                $response['message'] = 'Get data success';
+            }
+        } catch (\Exception $e) {
+            echo 'Something Error in' . $e->getMessage() . "\n";
         }
 
         return response()->json($response);
@@ -101,29 +98,32 @@ class BrandController extends Controller
 
     public function update(Request $request, $id)
     {
-        $response = [
-            'data' => [],
-            'message' => 'Update fails'
-        ];
+        $response = $this->response();
 
-        $validator = Validator($request->only('name', 'logo'), [
-            'name' => 'max:255|string',
-            'logo' => 'string'
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([$validator->errors()]);
-        }
-
-        $brand = Brand::where('id', $id)
-        ->where('status', Constants::BRAND_STATUS_ACTIVE)
-        ->update([
-            'name' => $request->name,
-            'logo' => $request->logo
-        ]);
-
-        if ($brand) {
-            $response['message'] = 'Update success';
+        try {
+            $validator = Validator($request->only('name', 'logo'), [
+                'name' => 'max:255|string',
+                'logo' => 'string'
+            ]);
+    
+            if ($validator->fails()) {
+                $response['data'] = $validator->errors();
+    
+                return response()->json($response);
+            }
+    
+            $brand = Brand::where('id', $id)
+            ->where('status', Constants::BRAND_STATUS_ACTIVE)
+            ->update([
+                'name' => $request->name,
+                'logo' => $request->logo
+            ]);
+    
+            if ($brand) {
+                $response['message'] = 'Update success';
+            }
+        } catch (\Exception $e) {
+            echo 'Something Error in' . $e->getMessage() . "\n";
         }
 
         return response()->json($response);
@@ -131,19 +131,20 @@ class BrandController extends Controller
 
     public function destroy($id)
     {
-        $response = [
-            'data' => [],
-            'message' => 'Delete false',
-        ];
+        $response = $this->response();
 
-        $brand = Brand::where('id', $id)
-        ->where('status', Constants::BRAND_STATUS_ACTIVE)
-        ->update([
-            'status' => Constants::BRAND_STATUS_DEACTIVE
-        ]);
-
-        if ($brand) {
-            $response['message'] = 'Delete success!';
+        try {
+            $brand = Brand::where('id', $id)
+            ->where('status', Constants::BRAND_STATUS_ACTIVE)
+            ->update([
+                'status' => Constants::BRAND_STATUS_DEACTIVE
+            ]);
+    
+            if ($brand) {
+                $response['message'] = 'Delete success!';
+            }
+        } catch (\Exception $e) {
+            echo 'Something Error in' . $e->getMessage() . "\n";
         }
 
         return response()->json($response);

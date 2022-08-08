@@ -16,5 +16,10 @@ class Constants {
 
     const PRODUCT_CATEGORY_STATUS_ACTIVE = 1;
     const PRODUCT_CATEGORY_STATUS_DEACTIVE = 0;
+
+    const BAD_REQUEST = 400;
+    const UNAUTHORIZED = 401;
+    const FORBIDDEN = 403;
+    const NOT_FOUND = 404;
 }
 ?>
