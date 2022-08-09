@@ -2,16 +2,18 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Redis;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
+    protected $appends = ['role_name'];
+    
     /**
      * The attributes that are mass assignable.
      *
@@ -53,21 +55,52 @@ class User extends Authenticatable
     //     return 'a';
     // }
 
+    public function role()
+    {
+        return $this->hasMany(RoleHasPermission::class, 'role_id');
+    }
+
+    public function setRoleNameAttribute()
+    {
+        $this->appends['role_name'] = 'rolenamene';
+    }
+
+    public function getRoleNameAttribute()
+    {
+        return $this->appends;
+    }
+
     public function hasRole($permission)
     {
+        $key = $this->id . ':' . $permission;
+
         try {
-            $permission = RolePermission::leftJoin('users_permission', 'users_permission.id', '=', 'role_permission.permission_id')
-            ->where('role_permission.role_id', $this->role_id)
+            if ($value = Redis::get($key)) {
+
+                if ($value === 'true') {
+                    return true;
+                } else {
+                    return false;
+                }
+            } 
+
+            $perm = RoleHasPermission::leftJoin('users_permission', 'users_permission.id', '=', 'role_has_permission.permission_id')
+            ->where('role_has_permission.role_id', $this->role_id)
             ->where('users_permission.name', $permission)->first();
     
-            if (!$permission) {
+            if (!$perm) {
+                Redis::set($key, 'false');
+
                 return false;
             }
-    
+
+            Redis::set($key, 'true');
+
             return true;
         } catch (\Exception $e) {
-            echo 'Something Error in' . $e->getMessage() . "\n";
+            echo "Something Error in\n" . $e->getMessage() . "\n";
             return false;
         }
     }
+
 }
