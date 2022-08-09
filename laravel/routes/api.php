@@ -2,10 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\API\ProductController;
-use App\Http\Controllers\API\BrandController;
-use App\Http\Controllers\API\ProductCategoryController;
-use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\API;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,19 +15,19 @@ use App\Http\Controllers\API\AuthController;
 |
 */
 //API route for register new user
-Route::post('/register', [AuthController::class, 'register']);
+Route::post('/register', [API\AuthController::class, 'register']);
 //API route for login user
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login', [API\AuthController::class, 'login']);
 
 Route::group(['middleware' => ['auth:sanctum']], function () {
     // Brand
-    Route::resource('brands', BrandController::class);
+    Route::resource('brands', API\BrandController::class);
 
     // Product
-    Route::resource('products', ProductController::class);
+    Route::resource('products', API\ProductController::class);
 
     // Product category
-    Route::resource('product_category', ProductCategoryController::class);
+    Route::resource('product_category', API\ProductCategoryController::class);
 
     // Get infomation user
     Route::get('user', function(Request $request) {
@@ -38,8 +35,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     });
 
     // Logout
-    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::post('/logout', [API\AuthController::class, 'logout']);
 
-    Route::get('/tokens', [AuthController::class, 'getTokens']);
+    Route::get('/tokens', [API\AuthController::class, 'getTokens']);
 });
 

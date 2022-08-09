@@ -125,7 +125,6 @@ class BrandController extends Controller
             ]);
     
             if ($brand) {
-                $response['data'] = $brand;
                 $response['message'] = 'Update success';
                 $response['code'] = 200;
             }
