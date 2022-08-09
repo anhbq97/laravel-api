@@ -15,9 +15,4 @@ class RoleHasPermission extends Model
     {
         return $this->belongsTo(UserRole::class);
     }
-
-    public function getPermission()
-    {
-
-    }
 }
