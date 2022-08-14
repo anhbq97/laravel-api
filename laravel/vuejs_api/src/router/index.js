@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import store from '../store';
 import HomeView from '../views/HomeView.vue'
 
 const router = createRouter({
@@ -12,20 +13,44 @@ const router = createRouter({
     {
       path: '/about',
       name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
+      
       component: () => import('../views/AboutView.vue')
     },
     {
-      path: '/login',
-      name: 'login',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import('../views/Auth/LoginView.vue')
+      path: '/auth',
+      name: 'auth',
+
+      component: () => import('../components/AuthLayout.vue'),
+      meta: {isGuest: true},
+
+      children: [
+        {path: '/login', name: 'login', component: () => import('../views/Auth/LoginView.vue')},
+        {path: '/register', name: 'register', component: () => import('../views/Auth/RegisterView.vue')}
+      ]
+    },
+    {
+      path: '/admin',
+      name: 'admin',
+
+      component: () => import('../views/Admin/AdminView.vue'),
+      meta: {requiresAuth: true},
+
+      children: [
+        {path: '/admin/users', name: 'admin.manager', component: () => import('../views/Admin/UsersView.vue')},
+        {path: '/admin/profile', name: 'admin.profile', component: () => import('../views/Admin/ProfileView.vue')}
+      ]
     }
   ]
 })
 
-export default router
+router.beforeEach((to, from, next) => {
+  if (to.meta.requiresAuth && !store.state.user.token) {
+    next({name: 'login'})
+  } else if (store.state.user.token && to.meta.isGuest) {
+    next({name: 'admin'});
+  } else {
+    next();
+  }
+});
+
+export default router;

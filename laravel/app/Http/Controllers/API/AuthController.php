@@ -85,7 +85,9 @@ class AuthController extends Controller
             'message' => 'Logout fails'
         ];
 
-        $request->user()->currentAccessToken()->delete();
+        // $request->user()->currentAccessToken()->delete();
+        $user = Auth::user();
+        $user->currentAccessToken()->delete();
 
         $response['message'] = 'Logout success. Bye ' . $request->user()->name;
 
